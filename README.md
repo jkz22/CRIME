@@ -94,5 +94,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 If you use CRIME in your research, please cite it as follows:
 
 ```
-Author, A. (Year). Title of the paper. Journal/Conference, Pages. Repository link.
+Zaki, JK., Lio, P., Scherman, O. et al., (2024). Explainable Deep Learning Framework for SERS
+Bio-quantification. chemRxiv.
 ```
