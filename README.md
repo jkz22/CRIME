@@ -95,5 +95,5 @@ If you use CRIME in your research, please cite it as follows:
 
 ```
 Zaki, JK., Lio, P., Scherman, O. et al., (2024). Explainable Deep Learning Framework for SERS
-Bio-quantification. chemRxiv.
+Bio-quantification. arXiv.
 ```
