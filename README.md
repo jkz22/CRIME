@@ -36,16 +36,30 @@ Load your model and data. Ensure that all spectra use a consistent x-axis:
 import tensorflow as tf
 import torch
 import pandas as pd
-from CRIME.CRIME import run_CRIME
-from CRIME.lime_processing_functions as lpf
+import numpy as np
+import CRIME.crime as cr
+from CRIME.crime.CRIME_functions import run_CRIME
+import CRIME.crime.lime_processing_functions as lpf
 
-# Custom error for model training
+# Custom function used in the example model used, can be ignored for your implementation
+def mean_relative_percentage_error(y_true, y_pred):
+    # Avoid division by zero
+    denominator = tf.where(tf.math.equal(y_true, 0), tf.ones_like(y_true), y_true)
+    
+    # Calculate relative percentage error
+    rpe = tf.abs((y_pred - y_true) / denominator)
+    
+    # Return mean relative percentage error
+    return 100 * tf.reduce_mean(rpe)
+
 tf.keras.utils.get_custom_objects().update({'mean_relative_percentage_error': mean_relative_percentage_error})
 
-model = tf.keras.models.load_model('example_data_and_models/linear_model.keras')
-data = torch.load('example_data_and_models/data.pt')
-labels = torch.load('example_data_and_models/labels.pt')
-x_axis_values = pd.read_csv('example_data_and_models/xaxis.txt')
+
+data = torch.load('CRIME/example data and models/data.pt')
+labels = torch.load('CRIME/example data and models/labels.pt')
+x_axis_values = pd.read_csv('CRIME/example data and models/xaxis.txt')
+
+model = tf.keras.models.load_model('CRIME/example data and models/test_model.keras')
 ```
 
 ### Running CRIME
@@ -77,7 +91,7 @@ target_spectra = [sero, dopa, epi]
 target_titles = ['Serotonin', 'Dopamine', 'Epinephrine']
 target_colors = ['red', 'blue', 'green']
 
-matched_targets, combined_similarities = CRIME.similarity_match(target_spectra, target_titles, target_colors, separated_arrays, top_cluster_indices_global, spectra_means)
+matched_targets, combined_similarities = cr.similarity_match(target_spectra, target_titles, target_colors, separated_arrays, top_cluster_indices_global, spectra_means)
 
 ```
 
