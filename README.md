@@ -41,25 +41,22 @@ import CRIME.crime as cr
 from CRIME.crime.CRIME_functions import run_CRIME
 import CRIME.crime.lime_processing_functions as lpf
 
-# Custom function used in the example model used, can be ignored for your implementation
-def mean_relative_percentage_error(y_true, y_pred):
-    # Avoid division by zero
-    denominator = tf.where(tf.math.equal(y_true, 0), tf.ones_like(y_true), y_true)
-    
-    # Calculate relative percentage error
-    rpe = tf.abs((y_pred - y_true) / denominator)
-    
-    # Return mean relative percentage error
-    return 100 * tf.reduce_mean(rpe)
-
-tf.keras.utils.get_custom_objects().update({'mean_relative_percentage_error': mean_relative_percentage_error})
-
-
 data = torch.load('CRIME/example data and models/data.pt')
 labels = torch.load('CRIME/example data and models/labels.pt')
 x_axis_values = pd.read_csv('CRIME/example data and models/xaxis.txt')
 
-model = tf.keras.models.load_model('CRIME/example data and models/test_model.keras')
+# Split data into training and test sets
+X_train, X_test, y_train, y_test = train_test_split(data, labels, test_size=0.2, random_state=42)
+
+# Train a simple linear regression model
+model = LinearRegression()
+model.fit(X_train, y_train)
+
+# Define the prediction function for LIME
+def model_predict(data):
+    # Data needs to be scaled before prediction
+    data_scaled = scaler.transform(data)
+    return model.predict(data)
 ```
 
 ### Running CRIME
