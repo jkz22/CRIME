@@ -1,10 +1,10 @@
 from sklearn.cluster import KMeans
 import numpy as np
 import matplotlib.pyplot as plt
-from lime_processing_functions import plot_lime_global
+from CRIME.crime.lime_processing_functions import plot_lime_global
 from sklearn.preprocessing import MinMaxScaler
 from matplotlib import colormaps
-from CRIME_utils import cosine_similarity_manual
+from CRIME.crime.CRIME_utils import cosine_similarity_manual
 from matplotlib.patches import Rectangle
 
 # CRIME Functions
