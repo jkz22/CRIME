@@ -1,18 +1,10 @@
 
-import tensorflow as tf
+# import tensorflow as tf
 import numpy as np
 
 # Helper functions within functions
 
-def mean_relative_percentage_error(y_true, y_pred):
-    # Avoid division by zero
-    denominator = tf.where(tf.math.equal(y_true, 0), tf.ones_like(y_true), y_true)
-    
-    # Calculate relative percentage error
-    rpe = tf.abs((y_pred - y_true) / denominator)
-    
-    # Return mean relative percentage error
-    return 100 * tf.reduce_mean(rpe)
+
 
 
 def cosine_similarity_manual(v1, v2):
