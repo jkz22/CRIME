@@ -91,12 +91,16 @@ Set up and run the CRIME analysis to obtain contexts and match them with target 
 
 ```python
 # Initialize and run the explainer
-explainer = lpf.spectra_explainer(data, len(x_axis_values))
+explainer = lpf.spectra_explainer(data_scaled, len(x_axis_values))
+# Categories in this instance refer to the ranges in the original data. These are primarily for the clustering plot.
 categories = [data[labels == i].numpy() for i in range(4)]
-lime_data, category_indicator, spectra_indicator, mean_spectra_list = lpf.calculate_lime(categories, explainer, x_axis_values)
+# Similarly, each category label is necessary for the plot later.
+category_names = ['No', 'Low', 'Medium', 'High']
+
+lime_data, category_indicator, spectra_indicator, mean_spectra_list = lpf.calculate_lime(model, model_predict, categories, explainer, x_axis_values)
 
 # Execute CRIME analysis
-results = run_CRIME(lime_data=lime_data, encoder=model, cat_names=['No', 'Low', 'Medium', 'High'], context_names=list('ABCDEF'), mean_spectra_list = mean_spectra_list, category_indicator = category_indicator, plot_clusters=False)
+results = run_CRIME(lime_data=lime_data, encoder=encoder, cat_names=category_names, context_names=list('ABCDEF'), mean_spectra_list = mean_spectra_list, category_indicator = category_indicator, plot_clusters=False)
 ```
 
 ### Compound matching
