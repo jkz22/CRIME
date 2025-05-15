@@ -34,29 +34,54 @@ The package includes the following structure:
 Load your model and data. Ensure that all spectra use a consistent x-axis:
 
 ```python
-import tensorflow as tf
 import torch
 import pandas as pd
 import numpy as np
 import CRIME.crime as cr
 from CRIME.crime.CRIME_functions import run_CRIME
 import CRIME.crime.lime_processing_functions as lpf
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.preprocessing import MinMaxScaler
+from tensorflow import keras
+import tensorflow as tf
 
 data = torch.load('CRIME/example data and models/data.pt')
 labels = torch.load('CRIME/example data and models/labels.pt')
-x_axis_values = pd.read_csv('CRIME/example data and models/xaxis.txt')
+x_axis_values = pd.read_csv('CRIME/example data and models/xaxis.txt')[94:] # X-axis is cut to match the data.
 
-# Split data into training and test sets
-X_train, X_test, y_train, y_test = train_test_split(data, labels, test_size=0.2, random_state=42)
+'''
+You can run our CNN model or a simplified linear regression model as an example.
+The encoder is trained on explanations from the CNN model so the results may differ significantly.
+For a full demo, it is reccommended you load your own prediction model, and train your own encoder using your own data.
+'''
+
+# Support function for CNN
+@keras.saving.register_keras_serializable()
+def mean_relative_percentage_error(y_true, y_pred):
+    denominator = tf.where(tf.math.equal(y_true, 0), tf.ones_like(y_true), y_true)
+    rpe = tf.abs((y_pred - y_true) / denominator)
+    return 100 * tf.reduce_mean(rpe)
+
+model = tf.keras.models.load_model(
+    'CRIME/example data and models/linear_model.keras', custom_objects=None, compile=True, safe_mode=True
+)
+
+encoder = tf.keras.models.load_model(
+    'CRIME/example data and models/VAE-CLIME-encoder.keras', custom_objects=None, compile=True, safe_mode=True
+)
+
+scaler = MinMaxScaler()
+data_scaled = scaler.fit_transform(data)
 
 # Train a simple linear regression model
-model = LinearRegression()
-model.fit(X_train, y_train)
+# model = LinearRegression()
+# Split data into training and test sets
+# X_train, X_test, y_train, y_test = train_test_split(data, labels, test_size=0.2, random_state=42)
+# model.fit(X_train, y_train)
 
 # Define the prediction function for LIME
 def model_predict(data):
-    # Data needs to be scaled before prediction
-    data_scaled = scaler.transform(data)
     return model.predict(data)
 ```
 
