@@ -30,7 +30,7 @@ def CRIME_fit(number_of_clusters, latent_space, weight_data, mean_spectra_list, 
     
     # KMeans clustering
     
-    kmeans = KMeans(n_clusters=number_of_clusters, random_state=random_state)
+    kmeans = KMeans(n_clusters=number_of_clusters, random_state=random_state, n_init='auto')
     kmeans.fit(latent_space)
     context_labels = kmeans.labels_
     # centers = kmeans.cluster_centers_
