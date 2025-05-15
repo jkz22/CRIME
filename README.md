@@ -17,7 +17,6 @@ Clone this repository and install the required packages:
 ```bash
 git clone https://github.com/jkz22/CRIME.git
 cd CRIME
-pip install -r requirements.txt
 ```
 
 ## Structure
