@@ -5,11 +5,11 @@ from lime.lime_tabular import LimeTabularExplainer
 
 # LIME processing functions
 
-def spectra_explainer(data, spectra_length, mode):
+def spectra_explainer(data, spectra_length):
     # Initialize a LIME explainer object
     # Note: You might need to adjust the feature names and class names according to your dataset
     explainer = LimeTabularExplainer(training_data=np.array(data), # Use your data here
-                                                    mode=mode, # or 'classification' based on your model
+                                                    mode='regression', # or 'classification' based on your model
                                                     feature_names = [f'*{i}*' for i in range(spectra_length)],
                                                     discretize_continuous=True)
     return explainer
