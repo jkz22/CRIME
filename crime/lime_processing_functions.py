@@ -1,24 +1,24 @@
 import numpy as np
 import re
 from matplotlib import pyplot as plt
-import lime
+from lime.lime_tabular import LimeTabularExplainer
 
 # LIME processing functions
 
 def spectra_explainer(data, spectra_length):
     # Initialize a LIME explainer object
     # Note: You might need to adjust the feature names and class names according to your dataset
-    explainer = lime.lime_tabular.LimeTabularExplainer(training_data=np.array(data), # Use your data here
+    explainer = LimeTabularExplainer(training_data=np.array(data), # Use your data here
                                                     mode='regression', # or 'classification' based on your model
                                                     feature_names = [f'*{i}*' for i in range(spectra_length)],
                                                     discretize_continuous=True)
     return explainer
 
 
-def model_predict(model, data):
-    return model.predict(data)
+# def model_predict(model, data):
+#     return model.predict(data)
 
-def calculate_lime(categories, explainer, x_axis_values):
+def calculate_lime(model, model_predict, categories, explainer, x_axis_values):
 
     """
     Mass calculate LIME explanations for all instances across all categorical outcomes in the analysis.
@@ -49,7 +49,7 @@ def calculate_lime(categories, explainer, x_axis_values):
             instance_to_explain = categories[category_i][spectra_i] # Adjust index based on which instance you want to explain
             
             exp = explainer.explain_instance(data_row=instance_to_explain, 
-                                predict_fn=model_predict,
+                                predict_fn=lambda x: model_predict(x),
                                 num_features=spectra_length)
 
             # Get the list of explanations for all the features
@@ -111,7 +111,7 @@ def sort_lime(lime_weights, mean_spectra, x_axis_values):
     # Sorting by the feature index
     extracted_data.sort(key=lambda x: x[0])
     extracted_data = np.array(extracted_data)
-    extracted_data[:, 0] = x_axis_values.flatten()
+    extracted_data[:, 0] = x_axis_values.values.flatten()
     return extracted_data
 
 
