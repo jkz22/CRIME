@@ -74,10 +74,11 @@ def plot_CRIME(names, context_names, crime_labels, latent_space, category_indica
     # Scatter plot of the clusters
     ax1[0].scatter(latent_space[:, 0], latent_space[:, 1], c=crime_labels, cmap='viridis', edgecolors='grey')
 
-    # Creating a custom legend for clusters
-    colors = plt.cm.viridis(np.linspace(0, 1, 6))  # get the colors of the current colormap
+    n_contexts = len(context_names)
+    colors = plt.cm.viridis(np.linspace(0, 1, n_contexts))
     for i, color in enumerate(colors):
         ax1[0].scatter([], [], color=color, label=f'Context {context_names[i]}')
+    
 
     # plt.colorbar()
     ax1[0].set_xlabel('Latent Dimension 1', color='black')
