@@ -89,6 +89,8 @@ def model_predict(data):
 Set up and run the CRIME analysis to obtain contexts and match them with target spectra:
 
 ```python
+
+mode = 'regression'
 # Initialize and run the explainer
 explainer = lpf.spectra_explainer(data_scaled, len(x_axis_values))
 
