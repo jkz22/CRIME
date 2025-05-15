@@ -103,12 +103,11 @@ lime_data, category_indicator, spectra_indicator, mean_spectra_list = lpf.calcul
 The number of contexts is inferred from the length of the context names variable.
 Therefore it is advised that the analysis is ran once with an arbitrary amount after which the number of contexts
 is selected manually.
-
 '''
 context_names = list('ABCDEF')
 
 # Execute CRIME analysis
-results = run_CRIME(lime_data=lime_data, encoder=encoder, cat_names=category_names, context_names=context_names, mean_spectra_list = mean_spectra_list, category_indicator = category_indicator, plot_clusters=False)
+separated_arrays, _, spectra_means, _, _, _, top_cluster_indices_global = run_CRIME(lime_data=lime_data, encoder=encoder, cat_names=category_names, context_names=context_names, mean_spectra_list = mean_spectra_list, category_indicator = category_indicator, plot_clusters=False)
 ```
 
 ### Compound matching
@@ -116,9 +115,9 @@ results = run_CRIME(lime_data=lime_data, encoder=encoder, cat_names=category_nam
 If target compounds exist, highlighted regions in CRIME contexts can be compared for identification of relevant compounds:
 
 ```python
-sero = np.load('example data and models/serotonin.npy')
-dopa = np.load('example data and models/dopamine.npy')
-epi = np.load('example data and models/epinephrine.npy')
+sero = np.load('CRIME/example data and models/serotonin.npy')
+dopa = np.load('CRIME/example data and models/dopamine.npy')
+epi = np.load('CRIME/example data and models/epinephrine.npy')
 
 
 # Ensure colors and targets are consistent in numbers
