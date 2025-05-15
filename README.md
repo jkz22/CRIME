@@ -90,6 +90,15 @@ def model_predict(data):
 Set up and run the CRIME analysis to obtain contexts and match them with target spectra:
 
 ```python
+# Initialize and run the explainer
+explainer = lpf.spectra_explainer(data_scaled, len(x_axis_values))
+# Categories in this instance refer to the ranges in the original data. These are primarily for the clustering plot.
+categories = [data[labels == i].numpy() for i in range(4)]
+# Similarly, each category label is necessary for the plot later.
+category_names = ['No', 'Low', 'Medium', 'High']
+
+lime_data, category_indicator, spectra_indicator, mean_spectra_list = lpf.calculate_lime(model, model_predict, categories, explainer, x_axis_values)
+
 '''
 The number of contexts is inferred from the length of the context names variable.
 Therefore it is advised that the analysis is ran once with an arbitrary amount after which the number of contexts
