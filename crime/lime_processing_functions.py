@@ -5,11 +5,11 @@ from lime.lime_tabular import LimeTabularExplainer
 
 # LIME processing functions
 
-def spectra_explainer(data, spectra_length):
+def spectra_explainer(data, spectra_length, mode):
     # Initialize a LIME explainer object
     # Note: You might need to adjust the feature names and class names according to your dataset
     explainer = LimeTabularExplainer(training_data=np.array(data), # Use your data here
-                                                    mode='regression', # or 'classification' based on your model
+                                                    mode=mode, # or 'classification' based on your model
                                                     feature_names = [f'*{i}*' for i in range(spectra_length)],
                                                     discretize_continuous=True)
     return explainer
@@ -63,57 +63,123 @@ def calculate_lime(model, model_predict, categories, explainer, x_axis_values):
     return lime_data, category_indicator, spectra_indicator, mean_spectra_list
 
 
-def sort_lime(lime_weights, mean_spectra, x_axis_values):
+import re
+import numpy as np
 
+def sort_lime(lime_weights, instance_to_explain, x_axis_values):
     """
-    The LIME functions typically output the feature weights in order of size instead of in order of appearance.
-    The present function organizes the weights for ease of plotting. 
+    Organizes LIME weights for plotting, attempting robust parsing of feature strings.
 
     Parameters:
-    - lime_weights: lime weights
-    - mean_spectra: mean spectra for set lime weights 
-    - x_axis_values: x axis values of the spectra
+    - lime_weights: Output from LIME's exp.as_list(). List of (feature_string, weight).
+    - instance_to_explain: The actual data instance (e.g., spectrum) being explained.
+                           Used to fill in bounds when LIME gives a one-sided condition.
+    - x_axis_values: Pandas Series/DataFrame column or NumPy array of x-axis values (e.g., wavenumbers).
 
     Returns:
-    - extracted_data: returns a list of lime weights in order with x axis values combined
-
+    - A NumPy array where each row is (x_value, lower_bound, upper_bound, weight),
+      ordered by the original feature index.
     """
-    # Regex pattern to capture comparison operators and values
-    pattern = r"(?:(\d+\.\d+) < )?\*(\d+)\*\s*(<=?|>=?)\s*(\d+\.\d+)(?:\s*(<=?|>=?)\s*(\d+\.\d+))?"
+    
+    # Ensure x_axis_values is a flat NumPy array for consistent indexing
+    if hasattr(x_axis_values, 'values'):
+        x_values_flat = x_axis_values.values.flatten()
+    else:
+        x_values_flat = np.array(x_axis_values).flatten()
+        
+    num_total_features = len(x_values_flat)
+    
+    # Temporary list to store parsed data before sorting and full construction
+    parsed_explanations = {}
 
-    extracted_data = []
+    # Regex to find the feature index number inside asterisks, e.g., *123*
+    # This assumes feature names given to LIME were like '*0*', '*1*', etc.
+    idx_pattern = re.compile(r"\*(\d+)\*")
 
-    for feature, weight in lime_weights:
-        # Find the index
-        match = re.search(pattern, feature)
-        # print(feature)
-        # print(match)
+    for feature_string, weight in lime_weights:
+        idx_match = idx_pattern.search(feature_string)
+        
+        if not idx_match:
+            # This might happen if a feature string from LIME doesn't match the '*index*' pattern.
+            # Depending on LIME setup, this could be an unhandled case or an error.
+            # print(f"Warning: Could not extract an index from LIME feature string: {feature_string}")
+            continue
+        
+        original_feature_index = int(idx_match.group(1))
+        
+        # Ensure index is within bounds
+        if not (0 <= original_feature_index < num_total_features):
+            # print(f"Warning: Parsed index {original_feature_index} is out of bounds for spectrum length {num_total_features}.")
+            continue
+            
+        instance_val_at_index = instance_to_explain[original_feature_index]
+
+        # Default bounds: LIME explanation is about the instance's current value for that feature
+        # These will be updated if specific range patterns are matched in the string.
+        lower_bound = instance_val_at_index
+        upper_bound = instance_val_at_index
+
+        # Attempt to parse bounds from the feature string using a series of common LIME patterns.
+        # Values can be integers or floats, e.g., 0.5 or 5. Using (\d+\.?\d*) for flexibility.
+        
+        # Pattern 1: val1 < *idx* <= val2 (e.g., "0.5 < *1* <= 1.0" or "0.5<*1*<=1.0")
+        # Allows for optional spaces around operators
+        # Using \*\d+\* instead of just \*idx_match.group(0)\* to ensure the matched index is part of this pattern
+        match = re.search(r"(\d+\.?\d*)\s*<\s*\*\d+\*\s*<=\s*(\d+\.?\d*)", feature_string)
         if match:
-            index = int(match.group(2))
-            direction = match.group(3)
-            value1 = (match.group(1))
-            value2 = (match.group(4))
-            # lower_bound = 0
-            # upper_bound = 1
-            if value1 is not None:
-                lower_bound = float(value1)
-                upper_bound = float(value2)
-            elif direction == '>' or '>=':
-                upper_bound = float(value2)
-                lower_bound = mean_spectra[index]
+            lower_bound = float(match.group(1))
+            upper_bound = float(match.group(2))
+        else:
+            # Pattern 2: *idx* <= val2 (e.g., "*1* <= 1.0")
+            match = re.search(r"\*\d+\*\s*<=\s*(\d+\.?\d*)", feature_string)
+            if match:
+                # lower_bound remains instance_val_at_index as per original logic
+                upper_bound = float(match.group(1))
             else:
-                lower_bound = float(value2)
-                upper_bound = mean_spectra[index]
+                # Pattern 3: *idx* >= val1 (e.g., "*1* >= 0.5")
+                # (LIME often uses >= for lower bounds in simple inequalities)
+                match = re.search(r"\*\d+\*\s*>=\s*(\d+\.?\d*)", feature_string)
+                if match:
+                    lower_bound = float(match.group(1))
+                    # upper_bound remains instance_val_at_index
+                else:
+                    # Pattern 4: *idx* > val1 (e.g., "*1* > 0.5") - less common than >= for LIME
+                    match = re.search(r"\*\d+\*\s*>\s*(\d+\.?\d*)", feature_string)
+                    if match:
+                        lower_bound = float(match.group(1))
+                        # upper_bound remains instance_val_at_index
+                    else:
+                        # Pattern 5: *idx* < val1 (e.g., "*1* < 0.5") - less common than <= for LIME
+                        match = re.search(r"\*\d+\*\s*<\s*(\d+\.?\d*)", feature_string)
+                        if match:
+                            # lower_bound remains instance_val_at_index
+                            upper_bound = float(match.group(1))
+                        # else:
+                            # If no specific range pattern matched, the bounds remain instance_val_at_index.
+                            # This means the explanation refers to the feature at its current value.
+                            # print(f"Debug: No specific bound pattern matched for: {feature_string}. Using instance value for bounds.")
+                            pass
+        
+        parsed_explanations[original_feature_index] = {
+            'lower_bound': lower_bound,
+            'upper_bound': upper_bound,
+            'weight': weight
+        }
 
-        # Store extracted and processed data
-        extracted_data.append((index, lower_bound, upper_bound, weight))
-
-    # Sorting by the feature index
-    extracted_data.sort(key=lambda x: x[0])
-    extracted_data = np.array(extracted_data)
-    extracted_data[:, 0] = x_axis_values.values.flatten()
-    return extracted_data
-
+    # Construct the final sorted array, ensuring all features are present
+    output_list = []
+    for i in range(num_total_features):
+        x_val = x_values_flat[i]
+        if i in parsed_explanations:
+            exp_data = parsed_explanations[i]
+            output_list.append((x_val, exp_data['lower_bound'], exp_data['upper_bound'], exp_data['weight']))
+        else:
+            # If a feature was not in LIME's output (e.g., zero weight and omitted, or num_features in explain_instance was too low)
+            # Add a default entry: weight 0, bounds are the instance's actual value for that feature.
+            instance_val_at_current_index = instance_to_explain[i]
+            output_list.append((x_val, instance_val_at_current_index, instance_val_at_current_index, 0.0))
+            
+    return np.array(output_list)
 
 # Function assumes that spectra are categorized for example according to concentration ranges
 # If only one category exists, input the data as a list of one category
