@@ -56,7 +56,6 @@ def discretize_concentration(concentrations, thresholds=(3, 6)):
 
 
 from sklearn.decomposition import PCA
-import numpy as np
 
 class PCAEncoder:
     def __init__(self, n_components=2, random_state=None):
