@@ -114,7 +114,7 @@ context_names = list('ABCDEF')
 separated_arrays, _, spectra_means, _, _, _, top_cluster_indices_global = run_CRIME(lime_data=lime_data, encoder=encoder, cat_names=category_names, context_names=context_names, mean_spectra_list = mean_spectra_list, category_indicator = category_indicator, plot_clusters=False)
 ```
 
-![Alt text](./assets/Figure3.pdf)
+![Alt text](./assets/Figure3.png)
 
 ### Compound matching
 
