@@ -52,3 +52,39 @@ def discretize_concentration(concentrations, thresholds=(3, 6)):
         discretized_labels.append(label)
     
     return discretized_labels
+
+
+
+from sklearn.decomposition import PCA
+import numpy as np
+
+class PCAEncoder:
+    def __init__(self, n_components=2, random_state=None):
+        self.pca = PCA(n_components=n_components, random_state=random_state)
+        self.fitted = False
+
+    def fit(self, X):
+        """
+        X: np.ndarray of shape (n_samples, n_perturbs, n_features)
+        """
+        # flatten each sample
+        flat = X.reshape(X.shape[0], -1)
+        self.pca.fit(flat)
+        self.fitted = True
+        return self
+
+    def predict(self, X):
+        """
+        X: same shape as in fit
+        returns: (Z, X_recon)
+          Z:   (n_samples, n_components)
+          X_recon: (n_samples, n_perturbs, n_features)  inverse‐transformed back
+        """
+        if not self.fitted:
+            raise RuntimeError("PCAEncoder must be fit() before predict()")
+        flat = X.reshape(X.shape[0], -1)
+        Z = self.pca.transform(flat)                      # (n,2)
+        flat_recon = self.pca.inverse_transform(Z)        # (n, n_perturbs * n_features)
+        X_recon = flat_recon.reshape(X.shape)             # back to (n, n_perturbs, n_features)
+        return Z, X_recon
+
