@@ -146,6 +146,7 @@ This project is licensed under the Apache 2.0 License - see the [LICENSE](LICENS
 If you use CRIME in your research, please cite it as follows:
 
 ```
-Zaki, JK., Lio, P., Scherman, O. et al., (2024). Explainable Deep Learning Framework for SERS
-Bio-quantification. arXiv.
+Jihan K. Zaki, Jakub Tomasik, Jade A. McCune, Sabine Bahn, Pietro Lió, and Oren A. Scherman
+ACS Sensors Article ASAP
+DOI: 10.1021/acssensors.5c01058 
 ```
