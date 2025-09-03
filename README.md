@@ -7,8 +7,8 @@
 ## Features
 
 - **Interpretable Contexts:** Utilizes LIME to extract interpretable model explanations, which are then contextualized through the CRIME methodology.
+- **Analyte similarity match:** Finds high-likelihood analyte-context pairings using cosine similarity and weighted spectra-LIME clusters.
 - **Adaptability:** Initially designed for SERS spectra, but can be adapted for other spectral analyses.
-- **Open-Source:** Available for modification and extension under the MIT License.
 
 ## Installation
 
@@ -23,9 +23,7 @@ cd CRIME
 
 The package includes the following structure:
 - `example_data_and_models/`: Sample datasets and pre-trained models.
-- `CRIME/`: Core functionality including utilities and processing functions.
-- `tests/`: Test scripts for validation of the package functionalities.
-
+- `crime/`: Core functionality including utilities and processing functions.
 ## Usage
 
 ### Data Preparation
