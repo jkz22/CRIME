@@ -148,7 +148,5 @@ This project is licensed under the Apache 2.0 License - see the [LICENSE](LICENS
 If you use CRIME in your research, please cite it as follows:
 
 ```
-Jihan K. Zaki, Jakub Tomasik, Jade A. McCune, Sabine Bahn, Pietro Lió, and Oren A. Scherman
-ACS Sensors Article ASAP
-DOI: 10.1021/acssensors.5c01058 
+Zaki, J. K., Tomasik, J., McCune, J. A., Bahn, S., Lió, P., & Scherman, O. A. (2025). Explainable deep learning framework for SERS bioquantification. ACS Sensors, 10(9), 6597–6606. https://doi.org/10.1021/acssensors.5c01058
 ```
