@@ -10,6 +10,8 @@
 - **Analyte similarity match:** Finds high-likelihood analyte-context pairings using cosine similarity and weighted spectra-LIME clusters.
 - **Adaptability:** Initially designed for SERS spectra, but can be adapted for other spectral analyses.
 
+### Please see the colab demo to see how the code runs. The code below might be depreciated on newer versions of tensorflow or keras.
+
 ## Installation
 
 Clone this repository and install the required packages:
