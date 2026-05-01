@@ -29,7 +29,7 @@ cd CRIME
 ## Structure
 
 The package includes the following structure:
-- `example_data_and_models/`: Sample datasets and pre-trained models.
+- `examples/`: Sample datasets and pre-trained models.
 - `crime/`: Core functionality including utilities and processing functions.
 ## Usage
 
