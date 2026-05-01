@@ -50,9 +50,9 @@ from sklearn.preprocessing import MinMaxScaler
 from tensorflow import keras
 import tensorflow as tf
 
-data = torch.load('CRIME/example data and models/data.pt')
-labels = torch.load('CRIME/example data and models/labels.pt')
-x_axis_values = pd.read_csv('CRIME/example data and models/xaxis.txt')[94:] # X-axis is cut to match the data.
+data = torch.load('CRIME/examples/data.pt')
+labels = torch.load('CRIME/examples/labels.pt')
+x_axis_values = pd.read_csv('CRIME/examples/xaxis.txt')[94:] # X-axis is cut to match the data.
 
 '''
 You can run our CNN model or a simplified linear regression model as an example.
@@ -68,11 +68,11 @@ def mean_relative_percentage_error(y_true, y_pred):
     return 100 * tf.reduce_mean(rpe)
 
 model = tf.keras.models.load_model(
-    'CRIME/example data and models/linear_model.keras', custom_objects=None, compile=True, safe_mode=True
+    'CRIME/examples/linear_model.keras', custom_objects=None, compile=True, safe_mode=True
 )
 
 encoder = tf.keras.models.load_model(
-    'CRIME/example data and models/VAE-CLIME-encoder.keras', custom_objects=None, compile=True, safe_mode=True
+    'CRIME/examples/VAE-CLIME-encoder.keras', custom_objects=None, compile=True, safe_mode=True
 )
 
 scaler = MinMaxScaler()
@@ -126,9 +126,9 @@ separated_arrays, _, spectra_means, _, _, _, top_cluster_indices_global = run_CR
 If target compounds exist, highlighted regions in CRIME contexts can be compared for identification of relevant compounds:
 
 ```python
-sero = np.load('CRIME/example data and models/serotonin.npy')
-dopa = np.load('CRIME/example data and models/dopamine.npy')
-epi = np.load('CRIME/example data and models/epinephrine.npy')
+sero = np.load('CRIME/examples/serotonin.npy')
+dopa = np.load('CRIME/examples/dopamine.npy')
+epi = np.load('CRIME/examples/epinephrine.npy')
 
 
 # Ensure colors and targets are consistent in numbers
