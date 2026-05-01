@@ -10,6 +10,13 @@
 - **Analyte similarity match:** Finds high-likelihood analyte-context pairings using cosine similarity and weighted spectra-LIME clusters.
 - **Adaptability:** Initially designed for SERS spectra, but can be adapted for other spectral analyses.
 
+## Quick Start
+The fastest way to try CRIME is via the Colab demo:
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/jkz22/CRIME/blob/main/CRIME_DEMO.ipynb)
+
+The demo runs end-to-end on a subset of the data from the paper, demonstrating LIME explanations, VAE-based context discovery, and compound matching via cosine similarity. Note that the public demo uses a simplified model and training subset; full paper results were obtained on the complete dataset (see Methods in the paper).
+  
+
 ## Installation
 
 Clone this repository and install the required packages:
