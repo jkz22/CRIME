@@ -72,24 +72,6 @@ See `CRIME_DEMO.ipynb` for the full pipeline including model training, VAE encod
 
 ![Alt text](./assets/Figure3.png)
 
-### Compound matching
-
-If target compounds exist, highlighted regions in CRIME contexts can be compared for identification of relevant compounds:
-
-```python
-sero = np.load('examples/serotonin.npy')
-dopa = np.load('examples/dopamine.npy')
-epi = np.load('examples/epinephrine.npy')
-
-
-# Ensure colors and targets are consistent in numbers
-target_spectra = [sero, dopa, epi]
-target_titles = ['Serotonin', 'Dopamine', 'Epinephrine']
-target_colors = ['red', 'blue', 'green']
-
-matched_targets, combined_similarities = cr.similarity_match(target_spectra, target_titles, target_colors, separated_arrays, top_cluster_indices_global, spectra_means)
-
-```
 
 ## Structure
 
