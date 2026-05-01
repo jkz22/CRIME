@@ -26,100 +26,49 @@ Clone this repository and install the required packages:
 ```bash
 git clone https://github.com/jkz22/CRIME.git
 cd CRIME
+pip install -e .
 ```
 
-## Structure
 
-The package includes the following structure:
-- `examples/`: Sample datasets and pre-trained models.
-- `crime/`: Core functionality including utilities and processing functions.
+  
 ## Usage
 
-### Data Preparation
-
-Load your model and data. Ensure that all spectra use a consistent x-axis:
+After training your prediction model and encoder, the core CRIME workflow is:
 
 ```python
-import torch
-import pandas as pd
-import numpy as np
-import CRIME.crime as cr
-from CRIME.crime.CRIME_functions import run_CRIME
-import CRIME.crime.lime_processing_functions as lpf
-from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LinearRegression
-from sklearn.preprocessing import MinMaxScaler
-from tensorflow import keras
-import tensorflow as tf
+import crime as cr
+from crime.CRIME_functions import run_CRIME
+import crime.lime_processing_functions as lpf
 
-data = torch.load('CRIME/examples/data.pt')
-labels = torch.load('CRIME/examples/labels.pt')
-x_axis_values = pd.read_csv('CRIME/examples/xaxis.txt')[94:] # X-axis is cut to match the data.
-
-'''
-You can run our CNN model or a simplified linear regression model as an example.
-The encoder is trained on explanations from the CNN model so the results may differ significantly.
-For a full demo, it is reccommended you load your own prediction model, and train your own encoder using your own data.
-'''
-
-# Support function for CNN
-@keras.saving.register_keras_serializable()
-def mean_relative_percentage_error(y_true, y_pred):
-    denominator = tf.where(tf.math.equal(y_true, 0), tf.ones_like(y_true), y_true)
-    rpe = tf.abs((y_pred - y_true) / denominator)
-    return 100 * tf.reduce_mean(rpe)
-
-model = tf.keras.models.load_model(
-    'CRIME/examples/linear_model.keras', custom_objects=None, compile=True, safe_mode=True
+# Compute LIME explanations across categories
+explainer = lpf.spectra_explainer(data_scaled, n_features, mode='regression')
+lime_data, category_indicator, _, mean_spectra_list = lpf.calculate_lime(
+    model, model_predict, categories, explainer, x_axis_values
 )
 
-encoder = tf.keras.models.load_model(
-    'CRIME/examples/VAE-CLIME-encoder.keras', custom_objects=None, compile=True, safe_mode=True
+# Discover prediction contexts via the encoder's latent space
+separated_arrays, _, spectra_means, _, _, _, top_clusters = run_CRIME(
+    lime_data=lime_data,
+    encoder=encoder,
+    cat_names=category_names,
+    context_names=list('ABCDEF'),
+    mean_spectra_list=mean_spectra_list,
+    category_indicator=category_indicator,
 )
 
-scaler = MinMaxScaler()
-data_scaled = scaler.fit_transform(data)
-
-# Train a simple linear regression model
-# model = LinearRegression()
-# Split data into training and test sets
-# X_train, X_test, y_train, y_test = train_test_split(data, labels, test_size=0.2, random_state=42)
-# model.fit(X_train, y_train)
-
-# Define the prediction function for LIME
-def model_predict(data):
-    return model.predict(data)
+# Match contexts to known compounds
+matched, similarities = cr.similarity_match(
+    target_spectra=[serotonin, dopamine, epinephrine],
+    target_titles=['Serotonin', 'Dopamine', 'Epinephrine'],
+    target_colors=['red', 'blue', 'green'],
+    separated_arrays=separated_arrays,
+    top_cluster_indices_global=top_clusters,
+    spectra_means=spectra_means,
+)
 ```
 
-### Running CRIME
+See `CRIME_DEMO.ipynb` for the full pipeline including model training, VAE encoder definition, and visualisation.
 
-Set up and run the CRIME analysis to obtain contexts and match them with target spectra:
-
-```python
-
-mode = 'regression'
-# Initialize and run the explainer
-explainer = lpf.spectra_explainer(data_scaled, len(x_axis_values), mode)
-
-# Categories in this instance refer to the ranges in the original data. These are primarily for the clustering plot.
-categories = [data[labels == i].numpy() for i in range(4)]
-
-# Similarly, each category label is necessary for the plot later.
-category_names = ['No', 'Low', 'Medium', 'High']
-
-# Calculate all LIME explanations for individual spectra.
-lime_data, category_indicator, spectra_indicator, mean_spectra_list = lpf.calculate_lime(model, model_predict, categories, explainer, x_axis_values)
-
-'''
-The number of contexts is inferred from the length of the context names variable.
-Therefore it is advised that the analysis is ran once with an arbitrary amount after which the number of contexts
-is selected manually.
-'''
-context_names = list('ABCDEF')
-
-# Execute CRIME analysis
-separated_arrays, _, spectra_means, _, _, _, top_cluster_indices_global = run_CRIME(lime_data=lime_data, encoder=encoder, cat_names=category_names, context_names=context_names, mean_spectra_list = mean_spectra_list, category_indicator = category_indicator, plot_clusters=False)
-```
 
 ![Alt text](./assets/Figure3.png)
 
@@ -128,9 +77,9 @@ separated_arrays, _, spectra_means, _, _, _, top_cluster_indices_global = run_CR
 If target compounds exist, highlighted regions in CRIME contexts can be compared for identification of relevant compounds:
 
 ```python
-sero = np.load('CRIME/examples/serotonin.npy')
-dopa = np.load('CRIME/examples/dopamine.npy')
-epi = np.load('CRIME/examples/epinephrine.npy')
+sero = np.load('examples/serotonin.npy')
+dopa = np.load('examples/dopamine.npy')
+epi = np.load('examples/epinephrine.npy')
 
 
 # Ensure colors and targets are consistent in numbers
@@ -141,6 +90,13 @@ target_colors = ['red', 'blue', 'green']
 matched_targets, combined_similarities = cr.similarity_match(target_spectra, target_titles, target_colors, separated_arrays, top_cluster_indices_global, spectra_means)
 
 ```
+
+## Structure
+
+The package includes the following structure:
+- `crime/` — core package: LIME processing, CRIME analysis, similarity matching
+- `examples/` — sample data and pre-trained models for the demo
+- `CRIME_DEMO.ipynb` — end-to-end demo notebook
 
 ## Contributing
 
