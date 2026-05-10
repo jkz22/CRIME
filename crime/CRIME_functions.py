@@ -157,6 +157,10 @@ def CRIME_clustering(separated_arrays, spectra_means, context_names, plot_cluste
         weights = mean_of_positions[:,3]
         positions = mean_of_positions[:,0]
 
+        spectra = np.array(spectra).reshape(-1, 1)
+        weights = np.array(weights).reshape(-1, 1)
+        positions = np.array(positions).reshape(-1, 1)
+
         # Scale both arrays
         spectra_scaled = scaler.fit_transform(spectra)
         weights_scaled = scaler.fit_transform(weights)
