@@ -118,10 +118,10 @@ def CRIME_clustering(separated_arrays, spectra_means, context_names, plot_cluste
     Returns: 
     - figs: list of figures produced for each context
     - second_figs: list of figures produced for each context following clustering
-    - top_cluster_indices_global: list of indices for cluster regions which should be highlighted in the CRIME matching step
+    - mask_cluster_indices: list of indices for cluster regions which should be highlighted in the CRIME matching step
 
     """
-    top_cluster_indices_global = []
+    mask_cluster_indices = []
     
     figs = []
     second_figs = []
@@ -152,6 +152,10 @@ def CRIME_clustering(separated_arrays, spectra_means, context_names, plot_cluste
 
         # Initialize scaler with the desired range
         scaler = MinMaxScaler(feature_range=(-1, 1))
+
+        spectra = mean_spectra
+        weights = mean_of_positions[:,3]
+        positions = mean_of_positions[:,0]
 
         # Scale both arrays
         spectra_scaled = scaler.fit_transform(spectra)
@@ -187,7 +191,7 @@ def CRIME_clustering(separated_arrays, spectra_means, context_names, plot_cluste
         # top_cluster_indices = ([np.where(scatterweight_labels == cluster_id)[0] for cluster_id in top_5_clusters])
         bottom_cluster_indices = ([np.where(scatterweight_labels == cluster_id)[0] for cluster_id in bottom_5_clusters])
 
-        top_cluster_indices_global.append(bottom_cluster_indices)
+        mask_cluster_indices.append(bottom_cluster_indices)
 
         if plot_clusters:
 
@@ -212,7 +216,7 @@ def CRIME_clustering(separated_arrays, spectra_means, context_names, plot_cluste
 
             # mean_of_positions is a 2D array (842x4) where each element is the mean of that position across all arrays
             second_figs.append(plot_lime_global(mean_of_positions,  mean_spectra, f'CRIME Context {context_names[j]}', bottom_cluster_indices, True, True, True))
-    return figs, second_figs, top_cluster_indices_global
+    return figs, second_figs, mask_cluster_indices
 
 def run_CRIME(lime_data, encoder, cat_names, context_names, mean_spectra_list, category_indicator, plot_clusters = False, random_state = 42):
     
