@@ -153,6 +153,13 @@ def CRIME_clustering(separated_arrays, spectra_means, context_names, plot_cluste
         # Initialize scaler with the desired range
         scaler = MinMaxScaler(feature_range=(-1, 1))
 
+        # Step 1: Stack the arrays along a new axis, creating a 3D array
+        stacked_arrays = np.stack(separated_arrays[j])
+        
+        # Step 2: Compute the mean along the new axis (axis=0), which will reduce the 3D array back to a 2D array
+        mean_of_positions = np.mean(stacked_arrays, axis=0)
+        mean_spectra = spectra_means[j]
+
         spectra = mean_spectra
         weights = mean_of_positions[:,3]
         positions = mean_of_positions[:,0]
@@ -172,17 +179,17 @@ def CRIME_clustering(separated_arrays, spectra_means, context_names, plot_cluste
         
         n_clusters=15
         # Perform KMeans clustering
-        kmeans = KMeans(n_clusters, n_init=15)
+        kmeans = KMeans(n_clusters, n_init=15, random_state=42)
         kmeans.fit(X)
         scatterweight_labels = kmeans.labels_
 
         # Calculate the prominence for each cluster
         cluster_prominence = []
-        for i in range(n_clusters):
-            cluster_points = X[scatterweight_labels == i]
+        for c in range(n_clusters):
+            cluster_points = X[scatterweight_labels == c]
             # Assuming weight is in the second column and spectra in the second column
             total_weight_spectra = np.sum(np.abs(cluster_points[:, 1]) * (cluster_points[:,2]))
-            cluster_prominence.append((total_weight_spectra, i))
+            cluster_prominence.append((total_weight_spectra, c))
 
         # Sort clusters by the total weight and spectra sum (prominence)
         sorted_clusters = sorted(cluster_prominence, key=lambda x: x[0], reverse=True)  # Higher sum first
